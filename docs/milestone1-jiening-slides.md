@@ -4,7 +4,8 @@ These are English notes for the first three slides of the team's 6–7-slide, si
 
 ## Slide 1 — Who Connects the Departments? (about 35 seconds)
 
-**Subtitle:** Dependence and Resilience in an Email Network  
+**Subtitle:** Dependence and Resilience in an Email Network
+
 **Authors:** Jiening Yang and Yikang Cheng
 
 - Which department pairs rely most on a small number of employees?

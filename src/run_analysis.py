@@ -73,7 +73,7 @@ def main(argv=None) -> None:
     table_dir.mkdir(parents=True, exist_ok=True)
     for name, rows in tables.items():
         with (table_dir / f'{name}.csv').open('w', newline='', encoding='utf-8') as stream:
-            writer = csv.DictWriter(stream, fieldnames=SCHEMAS[name])
+            writer = csv.DictWriter(stream, fieldnames=SCHEMAS[name], lineterminator='\n')
             writer.writeheader()
             writer.writerows(rows)
     (output / 'metadata.json').write_text(json.dumps(metadata, indent=2) + '\n', encoding='utf-8')

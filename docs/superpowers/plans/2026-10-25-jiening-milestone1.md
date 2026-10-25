@@ -80,3 +80,5 @@
 - Task 3: complete — 4 CLI integration tests failed before implementation; all 26 tests passed afterward. Real-data exports include five tables, three visually inspected figures, and provenance metadata. A second real-data run reproduced all nine output files byte-for-byte; raw archive contents and hashes remained unchanged.
 - Whole-branch independent review: no material findings; reviewer reran all 26 tests, independently recomputed the tables, and checked claims, figures, and handoff semantics.
 - Scope ruling: deliver English Markdown report content and slide notes for team integration, rather than claim a complete team report/deck before Yikang's results exist. Keep the requested feature branch local and leave main unchanged.
+
+- Final formatting check found Python CSV writer defaults to CRLF, which Git flags as trailing whitespace. Reproduced the cause by inspecting exported bytes; set the writer line terminator to LF and regenerated the outputs. This is a separate formatting-only commit; numerical values and charts are unchanged.
