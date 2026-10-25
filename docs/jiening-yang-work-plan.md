@@ -4,7 +4,16 @@
 
 For Milestone 1, prepare a reproducible preliminary analysis that identifies which ordered department pairs depend on a small number of employees. Supply the validated graph and rankings needed by Yikang Cheng's initial removal experiments, and explain the dataset and approach in the presentation and report.
 
-This Milestone 1 work allocation swaps the member roles originally listed in the Milestone 0 proposal: Jiening owns data and rankings; Yikang owns removal experiments. Task lists below describe planned work, not completed analysis.
+This Milestone 1 work allocation swaps the member roles originally listed in the Milestone 0 proposal: Jiening owns data and rankings; Yikang owns removal experiments. The task lists below record the agreed scope. The upstream implementation, automated tests, exported tables, figures, English report draft, and slide notes are now available; final team-deck and report assembly remain integration tasks.
+
+## Implemented outputs and handoff
+
+- Code: `src/data.py`, `src/analysis.py`, `src/run_analysis.py`, and `src/plots.py`.
+- Verification: 26 tests covering loader validation, metric correctness, and end-to-end exports. The implementation followed test-first increments.
+- Results: five CSV tables, three figures, and provenance settings in `results/`; rerunning the analysis reproduced all outputs byte-for-byte in the recorded environment.
+- Writing: `docs/milestone1-jiening-results.md` and `docs/milestone1-jiening-slides.md` provide English source material for the team report and deck.
+- Handoff: `docs/handoff-to-yikang.md` contains the validated loader interface, ranking schemas, baseline counts, and removal-order examples.
+- Remaining joint work: Yikang's removal findings, assembled slides, final IEEE formatting, rehearsal, review, and submission. No removal or connection-adding results are claimed here.
 
 ## Start here — prepare the handoff to Yikang
 

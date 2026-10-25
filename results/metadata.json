@@ -1,0 +1,35 @@
+{
+  "inputs": {
+    "edges": {
+      "path": "data/raw/email-Eu-core.txt",
+      "sha256": "23e0ca0bce21a053025e78f7e9691ac9210ae806a0689bd5edff3c3bac572d4c"
+    },
+    "labels": {
+      "path": "data/raw/email-Eu-core-department-labels.txt",
+      "sha256": "91a089f21ee35eb224066456fa5322c8ad57c0f07b2da7a58a3220c72b5d54b5"
+    }
+  },
+  "versions": {
+    "python": "3.14.6",
+    "networkx": "3.7",
+    "numpy": "2.5.4",
+    "matplotlib": "3.11.2"
+  },
+  "analysis": {
+    "directed": true,
+    "weighted": false,
+    "self_loops_removed": 642,
+    "all_labeled_nodes_retained": true,
+    "betweenness": {
+      "normalized": true,
+      "weight": null,
+      "endpoints": false,
+      "exact": true
+    },
+    "contacts": "union of incoming and outgoing neighbors in other departments",
+    "ranking_tie_break": "ascending integer node ID; ranks are unique 1-based positions",
+    "dependence": "max employee incidence count / edge count for each ordered department pair",
+    "dependence_tie_break": "ascending integer node ID",
+    "dependence_figure_min_edges": 5
+  }
+}
