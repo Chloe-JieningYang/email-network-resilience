@@ -52,10 +52,10 @@
 **Consumes:** the loader's graph with integer node IDs and integer `department` attributes.
 **Produces:** `network_summary(graph, graph_version)`, `department_sizes(graph)`, `department_contacts(graph)`, `employee_rankings(graph)`, `department_dependence(graph)`, each returning CSV-ready lists of dictionaries.
 
-- [ ] Write hand-derived fixture tests for summaries, isolate inclusion, contact deduplication, directed-chain betweenness (=0.5 for the middle of a three-node chain), score ties, ordered department pairs, dependence ties, and empty graphs; observe expected failures.
-- [ ] Implement pure computations with deterministic row ordering and exact betweenness.
-- [ ] Run the complete suite and inspect the diff.
-- [ ] Commit: `feat: compute employee rankings and department dependence`.
+- [x] Write hand-derived fixture tests for summaries, isolate inclusion, contact deduplication, directed-chain betweenness (=0.5 for the middle of a three-node chain), score ties, ordered department pairs, dependence ties, and empty graphs; observe expected failures.
+- [x] Implement pure computations with deterministic row ordering and exact betweenness.
+- [x] Run the complete suite and inspect the diff.
+- [x] Commit: `feat: compute employee rankings and department dependence`.
 
 ## Task 3: Reproducible outputs, figures, and handoff material
 
@@ -74,3 +74,5 @@
 - Proceed inline under the user's execution request. Plan and technical review make the existing work allocation concrete without reopening agreed scope.
 
 - Task 1: complete — 13 tests first failed on the unimplemented loader, then passed; raw inputs unchanged. Ruling: Python >=3.12 is required by the installed NetworkX/NumPy versions.
+
+- Task 2: complete — 9 new hand-derived tests failed on missing computations, then all 22 tests passed. Ranking ties use node IDs; dependency candidates include receiving employees.
