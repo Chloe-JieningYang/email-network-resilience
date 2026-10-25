@@ -62,11 +62,11 @@
 **Files:** `src/run_analysis.py`, `src/plots.py`, `tests/test_pipeline.py`, `results/`, `README.md`, `docs/milestone1-jiening-results.md`, `docs/handoff-to-yikang.md`, `docs/milestone1-jiening-slides.md`.
 **Consumes:** Task 2 tables. **Produces:** agreed CSVs, department sizes/contact CSVs, input checksums/version metadata, three labeled PNGs, and English interpretation/references.
 
-- [ ] Write a CLI integration test on a tiny custom dataset verifying literal CSV results, output isolation, provenance, and nonempty figures; observe failure before implementation.
-- [ ] Implement `python -m src.run_analysis` with optional `--edges`, `--labels`, and `--output-dir` arguments. Use a headless plotting backend; avoid changing the caller's graph.
-- [ ] Run the full real-data pipeline; inspect the tables and rendered figures; generate English method/results text and a slide outline from verified outputs.
-- [ ] Verify a rerun yields identical tables; run the complete suite, inspect staged changes, and perform a fresh whole-branch review.
-- [ ] Commit: `feat: export milestone analysis and handoff materials`.
+- [x] Write a CLI integration test on a tiny custom dataset verifying literal CSV results, output isolation, provenance, and nonempty figures; observe failure before implementation.
+- [x] Implement `python -m src.run_analysis` with optional `--edges`, `--labels`, and `--output-dir` arguments. Use a headless plotting backend; avoid changing the caller's graph.
+- [x] Run the full real-data pipeline; inspect the tables and rendered figures; generate English method/results text and a slide outline from verified outputs.
+- [x] Verify a rerun yields identical tables; run the complete suite, inspect staged changes, and perform a fresh whole-branch review.
+- [x] Commit: `feat: export milestone analysis and handoff materials`.
 
 ## Execution record
 
@@ -76,3 +76,7 @@
 - Task 1: complete — 13 tests first failed on the unimplemented loader, then passed; raw inputs unchanged. Ruling: Python >=3.12 is required by the installed NetworkX/NumPy versions.
 
 - Task 2: complete — 9 new hand-derived tests failed on missing computations, then all 22 tests passed. Ranking ties use node IDs; dependency candidates include receiving employees.
+
+- Task 3: complete — 4 CLI integration tests failed before implementation; all 26 tests passed afterward. Real-data exports include five tables, three visually inspected figures, and provenance metadata. A second real-data run reproduced all nine output files byte-for-byte; raw archive contents and hashes remained unchanged.
+- Whole-branch independent review: no material findings; reviewer reran all 26 tests, independently recomputed the tables, and checked claims, figures, and handoff semantics.
+- Scope ruling: deliver English Markdown report content and slide notes for team integration, rather than claim a complete team report/deck before Yikang's results exist. Keep the requested feature branch local and leave main unchanged.
