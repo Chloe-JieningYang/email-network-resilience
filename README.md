@@ -41,3 +41,32 @@ Both files use two nonnegative integer columns. Edge rows are `source target`; l
 Source: [SNAP email-Eu-core](https://snap.stanford.edu/data/email-Eu-core.html). Original data: 1,005 employees, 42 anonymous departments, 25,571 directed edges. Removing 642 self-loops leaves 24,929 edges and retains all 1,005 employees, including 19 isolates.
 
 An edge represents at least one email relationship, not a message count. Our dependence score measures concentration of direct department contacts. It does not establish that removing an employee disconnects departments; Yikang's employee-level removal experiments evaluate that question separately.
+
+## Employee-removal experiments (Yikang)
+
+After the upstream analysis, run:
+
+```bash
+python -m pytest -q
+python -m src.run_removal
+```
+
+This uses the validated default graph and original employee rankings. It checks
+input hashes against upstream metadata and validates unique ranking positions.
+The graph is copied for every experiment; ranking scores are never recomputed
+after deletion. Random seeds 0–29 each define one shuffled employee order, with
+nested prefixes at 0%, 1%, 2%, 5%, and 10% removal. Counts are rounded down
+and are identical for all strategies.
+
+Outputs: `results/tables/removal_trials.csv`,
+`results/figures/removal_comparison.png`, and `results/removal_metadata.json`.
+The CSV includes both requested and actual removal fractions. Blank seeds
+identify deterministic trials; undefined ratios are exported as `nan`.
+
+The figure shows three panels: retained cross-department edges, directed
+reachability among surviving cross-department employee pairs, and reachable
+surviving pairs divided by the original cross-department pair count. The last
+metric prevents denominator changes from hiding lost employees. Random bands
+show ±1 sample standard deviation across trials, not confidence intervals.
+Reachability is exact: SCC condensation preserves employee paths, and department
+labels only filter endpoint pairs. This is not department-graph reachability.

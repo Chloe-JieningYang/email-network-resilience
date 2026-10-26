@@ -1,0 +1,61 @@
+{
+  "fractions": [
+    0,
+    0.01,
+    0.02,
+    0.05,
+    0.1
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29
+  ],
+  "versions": {
+    "python": "3.12.7",
+    "networkx": "3.4.2",
+    "numpy": "1.26.4",
+    "matplotlib": "3.9.2"
+  },
+  "rankings": "fixed original graph; nested prefixes",
+  "ranking_sha256": "63b587cd0544e58ec7ba84ca6aac9318868d6cd0a6641bc169e284782610918c",
+  "inputs": {
+    "edges": {
+      "path": "data/raw/email-Eu-core.txt",
+      "sha256": "23e0ca0bce21a053025e78f7e9691ac9210ae806a0689bd5edff3c3bac572d4c"
+    },
+    "labels": {
+      "path": "data/raw/email-Eu-core-department-labels.txt",
+      "sha256": "91a089f21ee35eb224066456fa5322c8ad57c0f07b2da7a58a3220c72b5d54b5"
+    }
+  },
+  "undefined_values": "NaN",
+  "random_band": "sample standard deviation across trials, not a confidence interval"
+}
