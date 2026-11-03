@@ -33,8 +33,7 @@ yikangc@andrew.cmu.edu}
 \maketitle
 
 \begin{abstract}
-We study dependence and resilience in the SNAP email-Eu-core network of 1,005 employees across 42 departments. We measure how direct contacts between departments depend on individual employees and compare removal based on contact counts and directed betweenness. Contact-based removal removes more cross-department edges, while betweenness-based removal leaves fewer reachable employee pairs. These results motivate department case studies and tests of whether adding backup connections improves resilience.
-
+We study dependence and resilience in the SNAP email-Eu-core network of 1,005 employees across 42 departments. We measure department-pair dependence and compare random removal with targeting by external contacts or directed betweenness. Removing 100 employees by contacts retains 23.91\% of cross-department edges, versus 81.54\% for random removal. Betweenness targeting leaves lower survivor reachability than contact targeting (65.14\% versus 67.51\%). We next plan to test backup connections under equal edge budgets.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -47,13 +46,13 @@ Departments communicate through individual employees. When many contacts involve
 We study this problem using the SNAP \textit{email-Eu-core} network \cite{snap-email}. Our goal is to identify concentrated contacts between departments and measure how employee removal affects communication paths. We first measure dependence for each ordered department pair. We then rank employees by their number of contacts outside their department and by directed betweenness centrality. Finally, we compare targeted removal using these rankings with random removal at the same budgets. This lets us examine whether employees with many direct contacts are also the ones whose removal causes the greatest loss of directed reachability.
 
 \section{Previous Work}
-Yin et al.\ \cite{yin2017local} study local graph clustering using network motifs and include email-Eu-core in their experiments. Their work uses higher-order structure to find communities. We use the supplied department labels to ask how contacts between known departments depend on individual employees.
+Yin et al.\ \cite{yin2017local} use network motifs to find local communities and evaluate their method on email-Eu-core. Their analysis asks which groups can be recovered from network structure. We take the supplied department labels as fixed and ask how contacts between those groups depend on individual employees. This shifts the focus from finding communities to studying connections between them.
 
-Brandes \cite{brandes2001faster} gives an $O(NM)$ algorithm for exact betweenness centrality in unweighted graphs, where $N$ and $M$ are the numbers of nodes and edges. We use the NetworkX implementation \cite{networkx-betweenness} to compute directed betweenness. Comparing it with cross-department contact counts helps us distinguish employees with many external neighbors from those who lie on many shortest paths.
+Brandes \cite{brandes2001faster} gives an $O(NM)$ algorithm for exact betweenness centrality in unweighted graphs, where $N$ and $M$ are the numbers of nodes and edges. We use its NetworkX implementation \cite{networkx-betweenness}. Betweenness measures shortest-path brokerage across the whole graph; our contact score counts distinct neighbors outside an employee's department. Comparing both rankings and their removal outcomes tests whether these two roles have different effects on connectivity.
 
-Albert et al.\ \cite{albert2000error} show that scale-free networks can respond very differently to random failures and targeted removal of high-degree nodes. We apply this comparison to an empirical directed network and measure cross-department edge retention and employee-level reachability. We do not assume that email-Eu-core is scale free.
+Albert et al.\ \cite{albert2000error} show that scale-free networks can tolerate random failures while being vulnerable to targeted removal of high-degree nodes. We use the same random-versus-targeted comparison without assuming that email-Eu-core is scale free. Our evaluation separates the loss of direct cross-department edges from the loss of directed paths between employees in different departments. Measuring both matters because indirect paths may survive after many direct edges disappear.
 
-For our planned edge-addition experiments, Ghosh and Boyd \cite{ghosh2006growing} study how to select edges to improve algebraic connectivity. Their objective differs from our directed reachability measure, but their work provides a starting point for comparing edge-selection rules under a fixed budget.
+Ghosh and Boyd \cite{ghosh2006growing} study how to add a limited number of edges to improve algebraic connectivity in undirected graphs. Their spectral objective does not directly apply to our directed reachability measure. Their budgeted edge-selection setup is relevant to our next step: choosing backup contacts and comparing them with random additions under the same budget. We will evaluate those choices using employee-level directed paths.
 
 \section{Approach}
 
@@ -65,7 +64,7 @@ We build an unweighted directed graph $G=(V,E)$ and check that all edge endpoint
 \subsection{Research Questions and Mathematical Formulation}
 We address three research questions:
 
-\textbf{RQ1: Concentration of Department-Pair Contacts.} For any two distinct departments $A$ and $B$, let $E_{AB} \subseteq E$ denote the set of directed edges directed from employees in $A$ to employees in $B$. For each employee $v \in A \cup B$, let $c_{AB}(v)$ denote the number of edges in $E_{AB}$ incident to $v$. For pairs with $|E_{AB}| \ge 1$, we define the directed department-pair dependence $D_{AB}$ as:
+\textbf{RQ1: Concentration of Department-Pair Contacts.} For any two distinct departments $A$ and $B$, let $E_{AB} \subseteq E$ denote the set of edges from employees in $A$ to employees in $B$. For each employee $v \in A \cup B$, let $c_{AB}(v)$ denote the number of edges in $E_{AB}$ incident to $v$. For pairs with $|E_{AB}| \ge 1$, we define the directed department-pair dependence $D_{AB}$ as:
 \begin{equation}
     D_{AB} = \frac{\max_{v \in A \cup B} c_{AB}(v)}{|E_{AB}|} \in (0, 1].
 \end{equation}
@@ -97,7 +96,7 @@ Removal deletes an employee and all incident edges. Rankings stay fixed at their
 \section{Experimental Setup and Results}
 
 \subsection{Experimental Setup}
-We evaluate removal budgets of $B \in \{0, 10, 20, 50, 100\}$ employees, corresponding to integer floorings of 0\%, 1\%, 2\%, 5\%, and 10\% of the 1,005-node workforce. For each random seed from $0$ to $29$, we shuffle all employees and remove prefixes of the same order at increasing budgets. Targeted strategies use descending scores, breaking ties by ascending employee ID. Each experiment starts from a fresh copy of the original graph.
+We evaluate removal budgets of $B \in \{0, 10, 20, 50, 100\}$ employees, obtained by rounding down 0\%, 1\%, 2\%, 5\%, and 10\% of the 1,005-node workforce. For each random seed from $0$ to $29$, we shuffle all employees and remove prefixes of the same order at increasing budgets. Targeted strategies use descending scores, breaking ties by ascending employee ID. Each experiment starts from a fresh copy of the original graph.
 
 We report three metrics:
 \begin{enumerate}
@@ -152,7 +151,7 @@ $|E_{AB}| \ge 10$ & 450   & 1   & 0.364 \\
 \end{table}
 
 \textbf{Divergence between contacts and path brokerage.}
-As visualized in Fig.~\ref{fig:employee_rankings}, Employee 160 (Department 36) ranks first in both metrics, with $334$ cross-department contacts and normalized directed betweenness of $0.07212$. While the top-10 sets share 8 employees, notable discrepancies exist: Employee 377 ranks 9th in betweenness but only 42nd in contacts; Employee 129 ranks 10th in betweenness but 39th in contacts. These differences show why the two rankings may lead to different removal outcomes.
+Employee 160 (Department 36) ranks first in both metrics, with $334$ cross-department contacts and directed betweenness of $0.07212$ (Fig.~\ref{fig:employee_rankings}). The top-10 lists share eight employees. Employee 377 ranks 9th in betweenness and 42nd in contacts; Employee 129 ranks 10th and 39th, respectively. The rankings therefore select some different removal candidates.
 
 \begin{table}[htbp]
 \caption{Resilience Metrics at 100 Employees Removed (9.95\% Workforce)}
@@ -176,7 +175,7 @@ Betweenness-Targeted & 28.51\% & 65.14\% & 52.74\% \\
 At $B=100$, random removal retains an average of $81.54\%$ of cross-department edges and leaves $77.22\%$ of surviving cross-department pairs reachable (Table~\ref{tab:removal_results}). Contact-targeted removal retains $23.91\%$ of edges, compared with $28.51\%$ under betweenness-targeted removal. Betweenness targeting leaves lower survivor reachability: $65.14\%$, compared with $67.51\%$ for contact targeting, a difference of $2.37$ percentage points. The same ordering holds when reachable pairs are divided by the original pair count. Figure~\ref{fig:removal_comparison} shows the results across all removal budgets, with $\pm1$ sample standard deviation for random trials.
 
 \subsection{Discussion and Limitations}
-Contact targeting directly selects employees with many external neighbors, so it makes sense that it removes more cross-department edges. Betweenness targeting selects employees on many shortest paths and leaves fewer reachable pairs in these experiments. Even after contact targeting removes over $76\%$ of cross-department edges, $67.51\%$ of ordered cross-department pairs among surviving employees still have a directed path. This suggests that alternative paths preserve some connectivity after direct contacts disappear.
+Contact targeting selects employees with many external neighbors, which helps explain the greater loss of cross-department edges. Betweenness targeting selects employees on many shortest paths and leaves fewer reachable pairs in these experiments. Even after contact targeting removes over $76\%$ of cross-department edges, $67.51\%$ of ordered cross-department pairs among surviving employees still have a directed path. This suggests that alternative paths preserve some connectivity after direct contacts disappear.
 
 A remaining question is how dependence for a particular department pair relates to this global result. Our current experiments remove employees using global rankings; they do not establish the effect of removing the main contact for every highly dependent department pair. We will test selected pairs separately. The static graph also cannot capture changes in communication after employees leave. Our results describe structural connectivity in the observed network, rather than actual organizational performance.
 
