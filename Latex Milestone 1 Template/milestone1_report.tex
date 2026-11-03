@@ -162,7 +162,7 @@ Employee 160 (Department 36) ranks first in both metrics, with $334$ cross-depar
 \toprule
 \textbf{Strategy} & \textbf{Edge Ret.} & \textbf{Surv. Reach.} & \textbf{Orig. Reach.} \\
 \midrule
-Random (30 trials)   & 81.54\% & 77.22\% & 62.61\% \\
+Random mean (30 trials) & 81.54\% & 77.22\% & 62.61\% \\
 Contact-Targeted     & 23.91\% & 67.51\% & 54.52\% \\
 Betweenness-Targeted & 28.51\% & 65.14\% & 52.74\% \\
 \bottomrule
@@ -187,7 +187,7 @@ Direct contacts between some departments are concentrated around one employee, e
 \subsection{Plans for the Final Presentation}
 In early to mid November, we will study selected highly dependent department pairs. We will remove their main contact employees and measure both the direct edges lost and the remaining employee-level directed paths between the departments. This will help connect local dependence to the global removal results.
 
-We will then define a rule for adding directed employee-level edges to provide backup connections. We will compare targeted additions with random additions under equal edge budgets and evaluate whether they improve edge retention and directed reachability after removal. Candidate edges will exclude self-loops and existing edges. Ghosh and Boyd's edge-selection study \cite{ghosh2006growing} will inform this design, while our evaluation will use the directed metrics defined here. By November 30, we plan to complete these comparisons and prepare the final figures for the presentation in the first week of December. If time permits, we will also examine dynamic reranking and degree-preserving null models.
+We will then define a rule for adding directed employee-level edges to provide backup connections. We will compare targeted additions with random additions under equal budgets of new cross-department edges, excluding self-loops and duplicate additions. Edges will be selected using pre-removal information and added before removal. For each removal strategy and budget, all intervention variants will use the same employee removal list from the original graph, including identical random seeds; rankings will not be recomputed after adding edges. Edge retention will be measured relative to each augmented graph's pre-removal cross-department edge count. The reachability denominators will remain the surviving eligible pair count and the original $961,932$ eligible pairs, respectively. Ghosh and Boyd's edge-selection study \cite{ghosh2006growing} will inform this design. By November 30, we plan to complete these comparisons and prepare the final figures for the presentation in the first week of December. If time permits, we will also examine dynamic reranking and degree-preserving null models as separate sensitivity analyses.
 
 \subsection{Member Contributions}
 Jiening Yang handled data loading and cleaning, graph statistics, department-pair dependence, exact directed betweenness, employee rankings, and the corresponding plots. Jiening also prepared the analysis documentation and initial slides.
