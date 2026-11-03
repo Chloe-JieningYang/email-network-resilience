@@ -33,7 +33,7 @@ yikangc@andrew.cmu.edu}
 \maketitle
 
 \begin{abstract}
-We study dependence and resilience in the SNAP email-Eu-core network of 1,005 employees across 42 departments. We measure department-pair dependence and compare random removal with targeting by external contacts or directed betweenness. Removing 100 employees by contacts retains 23.91\% of cross-department edges, versus 81.54\% for random removal. Betweenness targeting leaves lower survivor reachability than contact targeting (65.14\% versus 67.51\%). We next plan to test backup connections under equal edge budgets.
+We study dependence and resilience in the SNAP email-Eu-core network of 1,005 employees across 42 departments. We measure department-pair dependence and compare random removal with targeting by external contacts or directed betweenness. Removing 100 employees by contacts retains 23.91\% of cross-department edges, versus 81.54\% for random removal. Betweenness targeting leaves lower survivor reachability than contact targeting (65.14\% versus 67.51\%). Many indirect paths remain after most direct cross-department edges are removed.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -52,12 +52,12 @@ Brandes \cite{brandes2001faster} gives an $O(NM)$ algorithm for exact betweennes
 
 Albert et al.\ \cite{albert2000error} show that scale-free networks can tolerate random failures while being vulnerable to targeted removal of high-degree nodes. We use the same random-versus-targeted comparison without assuming that email-Eu-core is scale free. Our evaluation separates the loss of direct cross-department edges from the loss of directed paths between employees in different departments. Measuring both matters because indirect paths may survive after many direct edges disappear.
 
-Ghosh and Boyd \cite{ghosh2006growing} study how to add a limited number of edges to improve algebraic connectivity in undirected graphs. Their spectral objective does not directly apply to our directed reachability measure. Their budgeted edge-selection setup is relevant to our next step: choosing backup contacts and comparing them with random additions under the same budget. We will evaluate those choices using employee-level directed paths.
+Ghosh and Boyd \cite{ghosh2006growing} study how to add a limited number of edges to improve algebraic connectivity in undirected graphs. Their spectral objective does not directly apply to our directed reachability measure. We use their budgeted edge-selection setup as a reference for planned experiments, not as a method in the current analysis. We will compare backup contacts with random additions under equal budgets using employee-level directed paths.
 
 \section{Approach}
 
 \subsection{Dataset and Network Construction}
-The SNAP \textit{email-Eu-core} dataset contains internal email relationships at a European research institution \cite{snap-email}. Each node is an employee, and a directed edge $(u,v)$ means that $u$ sent at least one email to $v$. The dataset has $1,005$ employees, $42$ departments, and $25,571$ directed edges. Each employee has one department label. Department sizes range from $1$ to $109$ employees, with a median of $17.5$.
+The SNAP \textit{email-Eu-core} dataset contains internal email relationships at a European research institution \cite{snap-email}. Each node is an employee, and a directed edge $(u,v)$ means that $u$ sent at least one email to $v$. The dataset has $1,005$ employees, $42$ departments, and $25,571$ directed edges. Each employee has one department label. Department sizes range from $1$ to $109$ employees, with a median of $14.5$.
 
 We build an unweighted directed graph $G=(V,E)$ and check that all edge endpoints have department labels. Removing $642$ self-loops leaves $24,929$ edges: $16,284$ cross-department edges (65.3\%) and $8,645$ internal edges (34.7\%). We retain all labeled employees, including the $19$ nodes that become isolated after removing self-loops. The largest weakly and strongly connected components contain $986$ and $803$ nodes, respectively.
 
@@ -108,8 +108,8 @@ We count reachable pairs exactly using the directed acyclic graph (DAG) formed b
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.92\linewidth]{figures/department_dependence.png}
-\caption{Ten highest-dependence department pairs among those with edge support $|E_{AB}| \ge 5$. Department pair $32 \to 14$ exhibits complete dependence ($D_{AB} = 1.0$) across all 27 directed edges, concentrated entirely in employee 971.}
+\includegraphics[width=0.92\linewidth]{figures/department_dependence_ecdf.png}
+\caption{Empirical cumulative distributions of department-pair dependence at three minimum edge-support thresholds. Each curve gives the fraction of retained ordered department pairs with dependence at most $D_{AB}$. Filtering sparse pairs reduces the share with complete dependence; see Table~\ref{tab:dependence_thresholds}.}
 \label{fig:dept_dependence}
 \end{figure}
 
@@ -130,7 +130,7 @@ We count reachable pairs exactly using the directed acyclic graph (DAG) formed b
 \subsection{Preliminary Results}
 
 \textbf{High pairwise dependence with substantial edge support.}
-Of the $42\times41=1,722$ possible directed department pairs, $1,203$ have at least one edge. Their median dependence is $0.50$, and $308$ have $D_{AB}=1$. Table~\ref{tab:dependence_thresholds} shows that complete dependence also occurs with more edge support: $13$ pairs have $D_{AB}=1$ with at least five edges. For Department $32\to14$, all $27$ edges involve Employee 971 (Fig.~\ref{fig:dept_dependence}). Removing this employee would remove every direct edge in that direction, although indirect paths may remain. For Department $24\to36$, Employee 163 is incident to $14$ of $15$ edges ($D_{AB}=0.933$).
+Of the $42\times41=1,722$ possible directed department pairs, $1,203$ have at least one edge. Their median dependence is $0.50$, and $308$ have $D_{AB}=1$. Figure~\ref{fig:dept_dependence} shows how the dependence distribution changes when sparse pairs are excluded. The median falls from $0.50$ to $0.40$ and $0.364$ at thresholds of five and ten edges, respectively (Table~\ref{tab:dependence_thresholds}). Complete dependence remains for $13$ pairs with at least five edges. For Department $32\to14$, all $27$ edges involve Employee 971. Removing this employee would remove every direct edge in that direction, although indirect paths may remain. For Department $24\to36$, Employee 163 is incident to $14$ of $15$ edges ($D_{AB}=0.933$).
 
 \begin{table}[htbp]
 \caption{Department Dependence Under Support Thresholds}
