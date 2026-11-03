@@ -33,7 +33,8 @@ yikangc@andrew.cmu.edu}
 \maketitle
 
 \begin{abstract}
-We investigate organizational dependence and network resilience in the SNAP email-Eu-core communication network of 1,005 employees across 42 departments. We formalize direct department-pair dependence and contrast degree-based cross-department contacts with shortest-path directed betweenness. Targeted node removal reveals that deleting high-contact employees severely degrades cross-department edge connectivity, whereas betweenness-targeted deletion causes greater loss in directed reachability. Our findings highlight structural vulnerabilities and provide a baseline for resilience-enhancing interventions.
+We study dependence and resilience in the SNAP email-Eu-core network of 1,005 employees across 42 departments. We measure how direct contacts between departments depend on individual employees and compare removal based on contact counts and directed betweenness. Contact-based removal removes more cross-department edges, while betweenness-based removal leaves fewer reachable employee pairs. These results motivate department case studies and tests of whether adding backup connections improves resilience.
+
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -41,74 +42,70 @@ complex networks, organizational communication, network resilience, node removal
 \end{IEEEkeywords}
 
 \section{Introduction and Motivation}
-In large modern institutions, inter-departmental collaboration is essential for innovation and operational continuity. While aggregate communication networks often appear densely interconnected, actual cross-department coordination frequently hinges on a handful of boundary-spanning individuals. In organizational science, such individuals act as information bridges; however, in network theory, they represent potential single points of structural failure. If key boundary personnel leave, become unavailable, or experience burnout, inter-departmental information channels can become severely degraded or severed.
+Departments communicate through individual employees. When many contacts involve the same person, that person's departure could remove most direct links between two departments. Other employees may still communicate through indirect paths, so counting lost contacts alone does not tell us how much connectivity remains.
 
-This project investigates the concentration of cross-department contacts and the structural resilience of communication pathways within a large European research institution using the SNAP \textit{email-Eu-core} dataset \cite{snap-email}. We examine two central questions:
-\begin{enumerate}
-    \item To what extent does direct communication between departmental pairs depend on specific individual employees?
-    \item How does targeted removal of key personnel—ranked either by direct cross-department contact volume or by global directed path brokerage—impact network edge retention and cross-department directed reachability compared to random employee turnover?
-\end{enumerate}
-
-To answer these questions, our approach combines granular structural analysis of ordered department-pair relationships with controlled node-removal experiments. By mapping pairwise departmental dependencies and contrasting local contact degree against global shortest-path betweenness centrality, we identify critical institutional bottlenecks. We then rigorously simulate employee departures under equal budget constraints, quantifying structural degradation via exact path reachability.
+We study this problem using the SNAP \textit{email-Eu-core} network \cite{snap-email}. Our goal is to identify concentrated contacts between departments and measure how employee removal affects communication paths. We first measure dependence for each ordered department pair. We then rank employees by their number of contacts outside their department and by directed betweenness centrality. Finally, we compare targeted removal using these rankings with random removal at the same budgets. This lets us examine whether employees with many direct contacts are also the ones whose removal causes the greatest loss of directed reachability.
 
 \section{Previous Work}
-Our study builds upon and connects three distinct threads in network science and organizational analysis:
+Yin et al.\ \cite{yin2017local} study local graph clustering using network motifs and include email-Eu-core in their experiments. Their work uses higher-order structure to find communities. We use the supplied department labels to ask how contacts between known departments depend on individual employees.
 
-\textbf{Higher-order structures and organizational clustering:} Yin et al. \cite{yin2017local} developed local higher-order graph clustering techniques grounded in network motifs, demonstrating that directional subgraphs reveal core functional organization in complex systems. Their analysis utilized the SNAP email-Eu-core dataset as a primary benchmark. While their focus was on unsupervised community discovery, our work takes advantage of the provided ground-truth institutional department labels to evaluate dependencies between predefined functional units.
+Brandes \cite{brandes2001faster} gives an $O(NM)$ algorithm for exact betweenness centrality in unweighted graphs, where $N$ and $M$ are the numbers of nodes and edges. We use the NetworkX implementation \cite{networkx-betweenness} to compute directed betweenness. Comparing it with cross-department contact counts helps us distinguish employees with many external neighbors from those who lie on many shortest paths.
 
-\textbf{Path brokerage and betweenness centrality:} Brandes \cite{brandes2001faster} introduced an $O(NM)$ algorithm for computing shortest-path betweenness centrality on directed networks, enabling the exact identification of path-brokerage roles without heuristic approximations. In this work, we compute exact directed betweenness across all 1,005 employees using the NetworkX implementation \cite{networkx-betweenness}. We compare this path-based brokerage metric against a simpler, local measure of cross-departmental contact degree, demonstrating that path mediation and direct contact volume capture distinct organizational roles.
+Albert et al.\ \cite{albert2000error} show that scale-free networks can respond very differently to random failures and targeted removal of high-degree nodes. We apply this comparison to an empirical directed network and measure cross-department edge retention and employee-level reachability. We do not assume that email-Eu-core is scale free.
 
-\textbf{Network resilience and targeted node removal:} The foundational work of Albert, Jeong, and Barab{\'a}si \cite{albert2000error} demonstrated that scale-free topologies exhibit robust tolerance against random failure but acute fragility under targeted attack on high-degree hubs. We extend this classic paradigm to an empirical institutional communication graph with explicit multi-department partition. Rather than merely assessing giant component fragmentation, we introduce exact cross-department pairwise reachability via strongly connected component (SCC) DAG condensation, providing an accurate, semantics-aware measure of organizational communication continuity.
+For our planned edge-addition experiments, Ghosh and Boyd \cite{ghosh2006growing} study how to select edges to improve algebraic connectivity. Their objective differs from our directed reachability measure, but their work provides a starting point for comparing edge-selection rules under a fixed budget.
 
 \section{Approach}
 
 \subsection{Dataset and Network Construction}
-We analyze the SNAP \textit{email-Eu-core} benchmark dataset \cite{snap-email}, which records internal email exchanges at a major European research institute over an 18-month duration. Each directed edge $(u, v)$ indicates that employee $u$ sent at least one email to employee $v$. The original dataset contains $1,005$ employees partitioned into $42$ disjoint, anonymous departments, comprising $25,571$ unique directed edges. Department sizes range from $1$ to $109$ employees (median $17.5$).
+The SNAP \textit{email-Eu-core} dataset contains internal email relationships at a European research institution \cite{snap-email}. Each node is an employee, and a directed edge $(u,v)$ means that $u$ sent at least one email to $v$. The dataset has $1,005$ employees, $42$ departments, and $25,571$ directed edges. Each employee has one department label. Department sizes range from $1$ to $109$ employees, with a median of $17.5$.
 
-We construct an unweighted, directed graph $G = (V, E)$. Network validation ensures all edge endpoints have valid department labels and eliminates self-loops ($(u, u)$), as self-communication does not represent organizational interaction. Removing 642 self-loops leaves $|E| = 24,929$ valid directed edges, partitioned into $16,284$ cross-department edges (65.3\%) and $8,645$ internal edges (34.7\%). All $1,005$ employees are preserved, including 19 isolated nodes resulting from self-loop elimination. The largest weakly connected component (WCC) contains $986$ nodes, and the largest strongly connected component (SCC) contains $803$ nodes.
+We build an unweighted directed graph $G=(V,E)$ and check that all edge endpoints have department labels. Removing $642$ self-loops leaves $24,929$ edges: $16,284$ cross-department edges (65.3\%) and $8,645$ internal edges (34.7\%). We retain all labeled employees, including the $19$ nodes that become isolated after removing self-loops. The largest weakly and strongly connected components contain $986$ and $803$ nodes, respectively.
 
 \subsection{Research Questions and Mathematical Formulation}
-We formulate our inquiry through three concrete research questions:
+We address three research questions:
 
 \textbf{RQ1: Concentration of Department-Pair Contacts.} For any two distinct departments $A$ and $B$, let $E_{AB} \subseteq E$ denote the set of directed edges directed from employees in $A$ to employees in $B$. For each employee $v \in A \cup B$, let $c_{AB}(v)$ denote the number of edges in $E_{AB}$ incident to $v$. For pairs with $|E_{AB}| \ge 1$, we define the directed department-pair dependence $D_{AB}$ as:
 \begin{equation}
     D_{AB} = \frac{\max_{v \in A \cup B} c_{AB}(v)}{|E_{AB}|} \in (0, 1].
 \end{equation}
-A value of $D_{AB} = 1.0$ indicates that all observed direct communication from $A$ to $B$ is funneled through a single employee. For example, if department $A$ sends 4 emails to department $B$ and employee $x \in A$ sends all 4, $D_{AB} = 4/4 = 1.0$. Conversely, if 4 distinct sender-receiver pairs exist, $D_{AB} = 1/4 = 0.25$. Because sparse pairs can produce high dependence trivially (e.g., $|E_{AB}|=1$ guarantees $D_{AB}=1$), we analyze dependence across multiple edge-support thresholds ($k \in \{1, 5, 10\}$).
+A value of $D_{AB}=1$ means that every observed edge from $A$ to $B$ involves one employee. For example, four edges from one sender in $A$ to four receivers in $B$ give $D_{AB}=1$. Four edges with four different senders and four different receivers give $D_{AB}=1/4$. These are counts of distinct relationships, not email messages. Since a single-edge pair always has $D_{AB}=1$, we compare minimum edge-support thresholds $k\in\{1,5,10\}$. High direct dependence alone does not establish that removing the employee would eliminate indirect paths.
 
-\textbf{RQ2: Local Contacts vs. Global Path Brokerage.} We define an employee's cross-department contact score $k_{\text{cross}}(v)$ as the count of distinct external neighbors:
+\textbf{RQ2: Local Contacts vs. Global Path Brokerage.} Let $d(v)$ denote employee $v$'s department. The cross-department contact score counts distinct neighbors outside that department, taking the union of incoming and outgoing contacts:
 \begin{equation}
-    k_{\text{cross}}(v) = |\{u \in V \setminus \text{dept}(v) : (u, v) \in E \lor (v, u) \in E\}|.
+\begin{aligned}
+\mathcal{N}_{\mathrm{cross}}(v)&=\{u\in V:d(u)\ne d(v),\\
+&\qquad (u,v)\in E\ \lor\ (v,u)\in E\},\\
+k_{\mathrm{cross}}(v)&=|\mathcal{N}_{\mathrm{cross}}(v)|.
+\end{aligned}
 \end{equation}
-In contrast, normalized directed betweenness centrality $C_B(v)$ captures shortest-path brokerage across the entire graph \cite{brandes2001faster}:
+We also compute normalized directed betweenness \cite{brandes2001faster}:
 \begin{equation}
-    C_B(v) = \frac{1}{(N-1)(N-2)} \sum_{s \neq v \neq t} \frac{\sigma_{st}(v)}{\sigma_{st}},
+C_B(v)=\frac{1}{(N-1)(N-2)}
+\sum_{\substack{s,t\in V\setminus\{v\}\\s\ne t}}
+\frac{\sigma_{st}(v)}{\sigma_{st}},
 \end{equation}
-where $\sigma_{st}$ is the total number of directed shortest paths from $s$ to $t$, and $\sigma_{st}(v)$ is the number of those paths passing through node $v$. We examine whether employees with high external degree necessarily mediate global paths.
+where $N=|V|$, $\sigma_{st}$ is the number of directed shortest paths from $s$ to $t$, and $\sigma_{st}(v)$ counts those passing through $v$. Unreachable pairs contribute zero, and endpoints are excluded. We compare the rankings to see whether employees with many external contacts also lie on many shortest paths.
 
 \textbf{RQ3: Network Resilience under Removal.} How rapidly does cross-department communication degrade when key personnel are removed? We benchmark three removal strategies: (1) Random removal (30 Monte Carlo permutations), (2) Targeted removal by descending cross-department contact count, and (3) Targeted removal by descending directed betweenness.
 
-\subsection{Key Assumptions}
-Our formulation relies on four explicit modeling assumptions:
-\begin{itemize}
-    \item \textbf{Static, unweighted topology:} Edges denote existence of communication channels, not message frequency or emotional urgency.
-    \item \textbf{Directional asymmetry:} Communication channels are asymmetric; $u \to v$ does not imply $v \to u$.
-    \item \textbf{Multi-hop employee reachability:} Department reachability is evaluated strictly via employee-level directed paths rather than department aggregation.
-    \item \textbf{Non-adaptive node removal:} Rankings are computed on the initial baseline graph without dynamic reranking, modeling immediate post-turnover disruption before institutional adaptation.
-\end{itemize}
+\subsection{Assumptions}
+We treat the network as static and unweighted. The data record observed relationships without message counts or timestamps, so we cannot measure communication frequency or the timing of information flow. Edges retain their direction: $u\to v$ does not imply $v\to u$. A directed path indicates possible structural reachability; it does not show that information actually traveled along that path.
+
+Removal deletes an employee and all incident edges. Rankings stay fixed at their values in the original graph. We do not model employees forming new contacts after a departure. All reachability calculations use paths in the employee graph, which avoids introducing paths through department aggregation.
 
 \section{Experimental Setup and Results}
 
 \subsection{Experimental Setup}
-We evaluate removal budgets of $B \in \{0, 10, 20, 50, 100\}$ employees, corresponding to integer floorings of 0\%, 1\%, 2\%, 5\%, and 10\% of the 1,005-node workforce. In random trials, nested prefix orders across seeds $0$--$29$ ensure consistent sub-sample progression.
+We evaluate removal budgets of $B \in \{0, 10, 20, 50, 100\}$ employees, corresponding to integer floorings of 0\%, 1\%, 2\%, 5\%, and 10\% of the 1,005-node workforce. For each random seed from $0$ to $29$, we shuffle all employees and remove prefixes of the same order at increasing budgets. Targeted strategies use descending scores, breaking ties by ascending employee ID. Each experiment starts from a fresh copy of the original graph.
 
-To quantify structural degradation, we report three core metrics:
+We report three metrics:
 \begin{enumerate}
     \item \textbf{Cross-department edge retention:} The ratio of surviving cross-department edges to the initial $16,284$ edges.
-    \item \textbf{Survivor reachability ratio:} The fraction of ordered cross-department employee pairs $(u, v)$ with $u, v \in V_{\text{surviving}}$ and $\text{dept}(u) \neq \text{dept}(v)$ that possess a directed path.
+    \item \textbf{Survivor reachability ratio:} The fraction of ordered cross-department employee pairs $(u, v)$ with $u, v \in V_{\text{surviving}}$ and $d(u) \neq d(v)$ that possess a directed path.
     \item \textbf{Reachability vs. original pairs:} The count of reachable surviving cross-department pairs divided by the initial $961,932$ cross-department pairs. This prevents denominator shrinkage from masking path destruction.
 \end{enumerate}
-Directed reachability is calculated exactly using Tarjan's SCC condensation DAG, preserving computational efficiency without graph approximation.
+We count reachable pairs exactly using the directed acyclic graph (DAG) formed by condensing strongly connected components (SCCs). Nodes within an SCC are mutually reachable; paths between SCCs determine the remaining reachable pairs. Before removal, $755,692$ of $961,932$ ordered cross-department pairs are reachable (78.56\%). The third metric uses all original eligible pairs as its denominator, so its baseline is also 78.56\%, not 100\%.
 
 \begin{figure}[htbp]
 \centering
@@ -120,7 +117,7 @@ Directed reachability is calculated exactly using Tarjan's SCC condensation DAG,
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.92\linewidth]{figures/employee_rankings.png}
-\caption{Cross-department contacts vs. exact normalized directed betweenness for all 1,005 employees. While top nodes correlate, substantial off-diagonal discordance demonstrates that local contact volume diverges from global path brokerage.}
+\caption{Cross-department contacts vs. exact normalized directed betweenness for all 1,005 employees. The rankings overlap but also select different employees, as discussed in the text.}
 \label{fig:employee_rankings}
 \end{figure}
 
@@ -134,7 +131,7 @@ Directed reachability is calculated exactly using Tarjan's SCC condensation DAG,
 \subsection{Preliminary Results}
 
 \textbf{High pairwise dependence with substantial edge support.}
-Among the $42 \times 41 = 1,722$ possible directed department pairs, $1,203$ pairs have at least one directed edge. The overall median dependence is $0.50$, and $308$ pairs exhibit $D_{AB} = 1.0$. As shown in Table~\ref{tab:dependence_thresholds}, filtering by minimum edge support confirms that high concentration is not merely an artifact of sparse single-edge pairs: $13$ pairs maintain $D_{AB} = 1.0$ at $|E_{AB}| \ge 5$. Notably, as shown in Fig.~\ref{fig:dept_dependence}, all $27$ directed edges from Department 32 to Department 14 involve a single individual (Employee 971), representing a critical institutional single-point vulnerability. Similarly, for Department $24 \to 36$, Employee 163 mediates 14 of 15 edges ($D_{AB} = 0.933$).
+Of the $42\times41=1,722$ possible directed department pairs, $1,203$ have at least one edge. Their median dependence is $0.50$, and $308$ have $D_{AB}=1$. Table~\ref{tab:dependence_thresholds} shows that complete dependence also occurs with more edge support: $13$ pairs have $D_{AB}=1$ with at least five edges. For Department $32\to14$, all $27$ edges involve Employee 971 (Fig.~\ref{fig:dept_dependence}). Removing this employee would remove every direct edge in that direction, although indirect paths may remain. For Department $24\to36$, Employee 163 is incident to $14$ of $15$ edges ($D_{AB}=0.933$).
 
 \begin{table}[htbp]
 \caption{Department Dependence Under Support Thresholds}
@@ -155,7 +152,7 @@ $|E_{AB}| \ge 10$ & 450   & 1   & 0.364 \\
 \end{table}
 
 \textbf{Divergence between contacts and path brokerage.}
-As visualized in Fig.~\ref{fig:employee_rankings}, Employee 160 (Department 36) ranks first in both metrics, with $334$ cross-department contacts and normalized directed betweenness of $0.07212$. While the top-10 sets share 8 employees, notable discrepancies exist: Employee 377 ranks 9th in betweenness but only 42nd in contacts; Employee 129 ranks 10th in betweenness but 39th in contacts. This confirms that certain employees act as critical structural bridges despite having moderate local degree.
+As visualized in Fig.~\ref{fig:employee_rankings}, Employee 160 (Department 36) ranks first in both metrics, with $334$ cross-department contacts and normalized directed betweenness of $0.07212$. While the top-10 sets share 8 employees, notable discrepancies exist: Employee 377 ranks 9th in betweenness but only 42nd in contacts; Employee 129 ranks 10th in betweenness but 39th in contacts. These differences show why the two rankings may lead to different removal outcomes.
 
 \begin{table}[htbp]
 \caption{Resilience Metrics at 100 Employees Removed (9.95\% Workforce)}
@@ -176,33 +173,29 @@ Betweenness-Targeted & 28.51\% & 65.14\% & 52.74\% \\
 \end{table}
 
 \textbf{Resilience under node removal.}
-Table~\ref{tab:removal_results} and Fig.~\ref{fig:removal_comparison} summarize the node removal experiments. At $B=100$ (9.95\% workforce removed):
-\begin{itemize}
-    \item Random removal exhibits remarkable structural stability, retaining $81.54\%$ of cross-department edges and leaving $77.22\%$ survivor reachability ($62.61\%$ of initial pairs).
-    \item Contact-targeted removal inflicts catastrophic edge attrition, preserving only $23.91\%$ of cross-department edges.
-    \item Betweenness-targeted removal is significantly more lethal to directed path connectivity, driving survivor reachability down to $65.14\%$ ($52.74\%$ of initial pairs), despite preserving more raw edges ($28.51\%$) than contact-targeted removal.
-\end{itemize}
+At $B=100$, random removal retains an average of $81.54\%$ of cross-department edges and leaves $77.22\%$ of surviving cross-department pairs reachable (Table~\ref{tab:removal_results}). Contact-targeted removal retains $23.91\%$ of edges, compared with $28.51\%$ under betweenness-targeted removal. Betweenness targeting leaves lower survivor reachability: $65.14\%$, compared with $67.51\%$ for contact targeting, a difference of $2.37$ percentage points. The same ordering holds when reachable pairs are divided by the original pair count. Figure~\ref{fig:removal_comparison} shows the results across all removal budgets, with $\pm1$ sample standard deviation for random trials.
 
-\subsection{Significance and Discussion}
-These preliminary results provide crucial insights into organizational network mechanics. First, they demonstrate that direct degree and shortest-path centrality target complementary structural layers: degree targeting rapidly strips local connectivity, whereas betweenness targeting dismantles global path efficiency. Second, despite the loss of over $76\%$ of direct cross-department edges under contact removal, more than $67\%$ of surviving employee pairs remain mutually reachable. This indicates high latent topological redundancy—information can reroute through secondary department bridges even when primary channels collapse.
+\subsection{Discussion and Limitations}
+Contact targeting directly selects employees with many external neighbors, so it makes sense that it removes more cross-department edges. Betweenness targeting selects employees on many shortest paths and leaves fewer reachable pairs in these experiments. Even after contact targeting removes over $76\%$ of cross-department edges, $67.51\%$ of ordered cross-department pairs among surviving employees still have a directed path. This suggests that alternative paths preserve some connectivity after direct contacts disappear.
+
+A remaining question is how dependence for a particular department pair relates to this global result. Our current experiments remove employees using global rankings; they do not establish the effect of removing the main contact for every highly dependent department pair. We will test selected pairs separately. The static graph also cannot capture changes in communication after employees leave. Our results describe structural connectivity in the observed network, rather than actual organizational performance.
 
 \section{Conclusion and Short-Term Plans}
 
 \subsection{Summary of Main Findings}
-In this milestone, we characterized the department-level dependence and resilience of the SNAP email-Eu-core network. We demonstrated that inter-departmental communication is highly concentrated in specific bridge personnel, including cases where entire inter-departmental relationships rely on a single employee. Furthermore, our deletion experiments proved that betweenness-targeted departures degrade directed path reachability substantially faster than random or degree-based attrition.
+Direct contacts between some departments are concentrated around one employee, even when the pair has many observed edges. Contact counts and directed betweenness produce overlapping rankings, but their removal effects differ. Contact targeting removes more direct cross-department edges, while betweenness targeting leaves lower directed reachability. We therefore use both measures when assessing resilience.
 
-\subsection{Plans for Milestone 2 and Final Presentations}
-For the final milestone and presentation, our short-term technical roadmap includes:
-\begin{enumerate}
-    \item \textbf{Dynamic Adaptive Reranking:} Recomputing centralities dynamically after each deletion increment to model adaptive network degradation.
-    \item \textbf{Resilience-Enhancing Interventions:} Designing and benchmarking targeted edge-addition algorithms (e.g., creating backup bridges between highly dependent department pairs) under fixed edge budgets to mitigate identified structural risks.
-    \item \textbf{Null Model Comparison:} Benchmarking observed resilience metrics against synthetic degree-preserving configuration models to determine whether observed resilience stems from modular organizational hierarchy or generic degree distributions.
-\end{enumerate}
+\subsection{Plans for the Final Presentation}
+In early to mid November, we will study selected highly dependent department pairs. We will remove their main contact employees and measure both the direct edges lost and the remaining employee-level directed paths between the departments. This will help connect local dependence to the global removal results.
 
-\subsection{Individual Member Contributions}
-\textbf{Jiening Yang:} Led the upstream structural analysis. Implemented data ingestion, network sanitization, descriptive graph metrics, exact pairwise departmental dependence formulation ($D_{AB}$), exact directed betweenness computations, employee ranking pipelines, and visualization figures (heatmap, dependence distribution, and ranking scatterplots). Prepared upstream documentation and initial slides.
+We will then define a rule for adding directed employee-level edges to provide backup connections. We will compare targeted additions with random additions under equal edge budgets and evaluate whether they improve edge retention and directed reachability after removal. Candidate edges will exclude self-loops and existing edges. Ghosh and Boyd's edge-selection study \cite{ghosh2006growing} will inform this design, while our evaluation will use the directed metrics defined here. By November 30, we plan to complete these comparisons and prepare the final figures for the presentation in the first week of December. If time permits, we will also examine dynamic reranking and degree-preserving null models.
 
-\textbf{Yikang Cheng:} Led the downstream removal and resilience analysis. Designed and implemented the node-removal simulation framework, developed the exact directed reachability engine using SCC condensation DAGs, conducted Monte Carlo random trials, benchmarked edge retention against pair reachability, created comparative resilience figures, and implemented automated unit tests.
+\subsection{Member Contributions}
+Jiening Yang handled data loading and cleaning, graph statistics, department-pair dependence, exact directed betweenness, employee rankings, and the corresponding plots. Jiening also prepared the analysis documentation and initial slides.
+
+Yikang (Bruce) Cheng implemented the removal experiments and exact reachability calculation using SCC condensation, ran the random trials, compared resilience metrics, and prepared the removal plots and automated tests.
+
+Both members will work on the department case studies, edge-addition comparisons, final report, and presentation.
 
 \begin{thebibliography}{00}
 \bibitem{snap-email}
@@ -214,11 +207,14 @@ H.~Yin, A.~R.~Benson, J.~Leskovec, and D.~F.~Gleich, ``Local higher-order graph 
 \bibitem{brandes2001faster}
 U.~Brandes, ``A faster algorithm for betweenness centrality,'' \textit{Journal of Mathematical Sociology}, vol. 25, no. 2, pp. 163--177, 2001.
 
+\bibitem{networkx-betweenness}
+A.~A.~Hagberg, D.~A.~Schult, and P.~J.~Swart, ``Exploring network structure, dynamics, and function using NetworkX,'' in \textit{Proc. 7th Python in Science Conf. (SciPy)}, 2008, pp. 11--15.
+
 \bibitem{albert2000error}
 R.~Albert, H.~Jeong, and A.-L.~Barab{\'a}si, ``Error and attack tolerance of complex networks,'' \textit{Nature}, vol. 406, no. 6794, pp. 378--382, 2000.
 
-\bibitem{networkx-betweenness}
-A.~A.~Hagberg, D.~A.~Schult, and P.~J.~Swart, ``Exploring network structure, dynamics, and function using NetworkX,'' in \textit{Proc. 7th Python in Science Conf. (SciPy)}, 2008, pp. 11--15.
+\bibitem{ghosh2006growing}
+A.~Ghosh and S.~Boyd, ``Growing well-connected graphs,'' in \textit{Proc. 45th IEEE Conf. Decision and Control}, 2006, pp. 6605--6611.
 \end{thebibliography}
 
 \end{document}
